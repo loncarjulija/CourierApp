@@ -22,11 +22,12 @@ namespace CourierApp.Services
             _order.Parcels = parcels;
         }
 
-        public Order ProcessOrder(bool isSpeedyShipping = false)
+        public Order ProcessOrder(bool isSpeedyShipping = false, IList<Discount> discounts = null)
         {
             _order.IsSpeedyShipping = isSpeedyShipping;
 
             _order.Parcels.ToList().ForEach(p => p.LoadCosts(_shippingRateProvider.GetShippingRates()));
+            _order.Discount = discounts != null ? discounts.Sum(x => x.CalculateDiscount(_order.Parcels)) : 0;
 
             LogOrder();
             return _order;
@@ -43,6 +44,7 @@ namespace CourierApp.Services
             }
 
             System.Diagnostics.Debug.WriteLine("---------------------------------------------------------------");
+            System.Diagnostics.Debug.WriteLine($"Discount: {_order.Discount.ToString("C", us)}");
             System.Diagnostics.Debug.WriteLine($"Speedy Shipping: {_order.SpeedyShippingCost.ToString("C", us)}");
             System.Diagnostics.Debug.WriteLine($"Total: {_order.TotalCost.ToString("C", us)}");
         }

@@ -12,7 +12,7 @@ namespace CourierApp.Tests
 
         public ParcelTests()
         {
-            _shippingRates = LoadShippingRates();
+            _shippingRates = SetupShippingRates();
         }
         [Fact]
         public void Parcel_GivenDimensions_1x1x1_ShouldReturn_SmallParcel_DeliveryCost_3()
@@ -134,7 +134,7 @@ namespace CourierApp.Tests
             }
         }
 
-        private static IList<ShippingRate> LoadShippingRates()
+        private static IList<ShippingRate> SetupShippingRates()
         {
             return new List<ShippingRate>
             {
