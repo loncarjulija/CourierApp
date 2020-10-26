@@ -7,6 +7,6 @@ namespace CourierApp.Services
     {
         void AddItems(IList<Parcel> parcels);
 
-        Order ProcessOrder();
+        Order ProcessOrder(bool isSpeedyShipping);
     }
 }

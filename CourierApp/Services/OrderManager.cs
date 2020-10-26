@@ -15,8 +15,10 @@ namespace CourierApp.Services
             _order.Parcels = parcels;
         }
 
-        public Order ProcessOrder()
+        public Order ProcessOrder(bool isSpeedyShipping = false)
         {
+            _order.IsSpeedyShipping = isSpeedyShipping;
+
             LogOrder();
             return _order;
         }
@@ -32,6 +34,7 @@ namespace CourierApp.Services
             }
 
             System.Diagnostics.Debug.WriteLine("---------------------------------------------------------------");
+            System.Diagnostics.Debug.WriteLine($"Speedy Shipping: {_order.SpeedyShippingCost.ToString("C", us)}");
             System.Diagnostics.Debug.WriteLine($"Total: {_order.TotalCost.ToString("C", us)}");
         }
     }

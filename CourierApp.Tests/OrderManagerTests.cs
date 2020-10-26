@@ -40,7 +40,7 @@ namespace CourierApp.Tests
         }
 
         [Fact]
-        public void Parcel_Given_2_MediumParcels_ShouldReturn_TotalCost_16()
+        public void Parcel_Given_2_MediumParcels_ShouldReturnTotalCost_16()
         {
             //arrange
             var parcels = new List<Parcel>
@@ -61,6 +61,31 @@ namespace CourierApp.Tests
                 Assert.NotNull(result);
                 Assert.Equal(expectedTotalCost, result.TotalCost);
             }
-        }        
+        }      
+        
+        [Fact]
+        public void Parcel_Given_LargeParcel_SpeedyShipping_ShouldReturnTotalCost_30()
+        {
+            //arrange
+            var parcels = new List<Parcel>
+            {
+                new Parcel(75, 50, 10)
+            };
+
+            var expectedTotalCost = 30;
+            var expectedSpeedyShippingCost = 15;
+
+            //act
+            Sut.AddItems(parcels);
+            var result = Sut.ProcessOrder(true);
+
+            //assert
+            using (new AssertionScope())
+            {
+                Assert.NotNull(result);
+                Assert.Equal(expectedTotalCost, result.TotalCost);
+                Assert.Equal(expectedSpeedyShippingCost, result.SpeedyShippingCost);
+            }
+        }   
     }
 }

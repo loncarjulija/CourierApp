@@ -7,6 +7,17 @@ namespace CourierApp.Models
     {
         public IList<Parcel> Parcels { get; set; }
 
-        public double TotalCost => Parcels.Sum(p => p.DeliveryCost);
+        public bool IsSpeedyShipping { get; set; }
+
+        public double TotalCost => GetTotalCost(); 
+
+        public double SpeedyShippingCost => IsSpeedyShipping ? TotalCost / 2 : 0;
+
+        private double GetTotalCost()
+        {
+            var totalCost = Parcels.Sum(p => p.DeliveryCost);
+
+            return IsSpeedyShipping ? 2 * totalCost : totalCost;
+        }
     }
 }
