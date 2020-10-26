@@ -110,6 +110,36 @@ namespace CourierApp.Tests
 
             _shippingRateProviderMock.VerifyAll();
         }
+
+        [Fact]
+        public void ProcessOrder_GivenTwoHeavyParcels_ShouldReturn_TotalCost_128()
+        {
+            //arrange
+            var parcels = new List<Parcel>
+            {
+                new Parcel(75, 50, 10, 55),
+                new Parcel(75, 50, 10, 73)
+            };
+
+            var expectedTotalCost = 128;
+
+            _shippingRateProviderMock.Setup(m => m.GetShippingRates())
+                .Returns(_shippingRates);
+
+            //act
+            Sut.AddItems(parcels);
+            var result = Sut.ProcessOrder();
+
+            //assert
+            using (new AssertionScope())
+            {
+                Assert.NotNull(result);
+                Assert.Equal(expectedTotalCost, result.TotalCost);
+            }
+
+            _shippingRateProviderMock.VerifyAll();
+        }
+
         
         private static IList<ShippingRate> LoadShippingRates()
         {
@@ -142,7 +172,14 @@ namespace CourierApp.Tests
                     DeliveryCost = 25,
                     WeightLimitInKg = 10,
                     OverweightCostPerKg = 2
-                }
+                },
+                new ShippingRate 
+                {
+                    ParcelType = ParcelType.Heavy,
+                    DeliveryCost = 50,
+                    WeightLimitInKg = 50,
+                    OverweightCostPerKg = 1
+                },
             };
         }
     }

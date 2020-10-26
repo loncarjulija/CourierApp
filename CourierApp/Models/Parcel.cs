@@ -38,6 +38,11 @@ namespace CourierApp.Models
 
         private ParcelType SetType(double length, double width, double height)
         {
+            if (WeightKg > 50)
+            {
+                return ParcelType.Heavy;
+            }
+
             var largestDimension = Math.Max(length, Math.Max(width, height));
 
             if (largestDimension < 10)

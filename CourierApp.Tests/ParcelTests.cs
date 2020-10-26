@@ -110,6 +110,30 @@ namespace CourierApp.Tests
             }
         }
 
+        [Fact]
+        public void Parcel_GivenParcelWeight_55kg_ShouldReturnH_HeavyParcel_TotalCost_55()
+        {
+            //arrange
+            var expectedDeliveryCost = 50;
+            var expectedOverweightCost = 5;
+            var expectedTotalCost = 55;
+
+            var sut = new Parcel(75, 50, 10, 55);
+
+            //act
+            sut.LoadCosts(_shippingRates);
+
+            //assert
+            using (new AssertionScope())
+            {
+                Assert.NotNull(sut);
+                Assert.Equal(ParcelType.Heavy, sut.Type);
+                Assert.Equal(expectedDeliveryCost, sut.DeliveryCost);
+                Assert.Equal(expectedOverweightCost, sut.OverweightCost);
+                Assert.Equal(expectedTotalCost, sut.TotalCost);
+            }
+        }
+
         private static IList<ShippingRate> LoadShippingRates()
         {
             return new List<ShippingRate>
@@ -141,7 +165,14 @@ namespace CourierApp.Tests
                     DeliveryCost = 25,
                     WeightLimitInKg = 10,
                     OverweightCostPerKg = 2
-                }
+                },
+                new ShippingRate 
+                {
+                    ParcelType = ParcelType.Heavy,
+                    DeliveryCost = 50,
+                    WeightLimitInKg = 50,
+                    OverweightCostPerKg = 1
+                },
             };
         }
     }
