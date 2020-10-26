@@ -1,7 +1,7 @@
 ﻿using CourierApp.Models;
 using System.Collections.Generic;
 
-namespace CourierApp.Services
+namespace CourierApp.Services.Interfaces
 {
     public interface IOrderManager
     {

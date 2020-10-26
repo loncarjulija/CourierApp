@@ -1,18 +1,40 @@
 ﻿using CourierApp.Enums;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace CourierApp.Models
 {
     public class Parcel
     {
-        public Parcel(double length, double width, double height)
+        public Parcel(double length, double width, double height, double weight = 0)
         {
+            WeightKg = weight;
             Type = SetType(length, width, height);
         }
 
         public ParcelType Type { get; private set; }
 
-        public double DeliveryCost => SetCost();
+        public double WeightKg { get; private set; }
+
+        public double DeliveryCost { get; private set; }
+
+        public double OverweightCost { get; private set; }
+
+        public double TotalCost => DeliveryCost + OverweightCost;
+
+        public void LoadCosts(IList<ShippingRate> shippingRates)
+        {
+            var shippingRate = shippingRates?.FirstOrDefault(sr => sr.ParcelType == Type);
+
+            if (shippingRate == null)
+            {
+                throw new Exception($"Provided shipping rates do not contain rate for {Type} parcel.");
+            }
+
+            DeliveryCost = shippingRate.DeliveryCost;
+            OverweightCost = (WeightKg > shippingRate.WeightLimitInKg) ? (WeightKg - shippingRate.WeightLimitInKg) * shippingRate.OverweightCostPerKg : 0;
+        }
 
         private ParcelType SetType(double length, double width, double height)
         {
@@ -34,23 +56,6 @@ namespace CourierApp.Models
             {
                 return ParcelType.XL;
             }
-        }
-
-        private double SetCost()
-        {
-            switch (Type)
-            {
-                case ParcelType.Small :
-                    return 3;
-                case ParcelType.Medium :
-                    return 8;
-                case ParcelType.Large :
-                    return 15;
-                case ParcelType.XL :
-                    return 25;
-                default:
-                    return 0;
-            }            
         }
     }
 }

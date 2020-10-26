@@ -1,7 +1,8 @@
 ﻿using CourierApp.Models;
-using System;
+using CourierApp.Services.Interfaces;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 
 namespace CourierApp.Services
 {
@@ -9,6 +10,12 @@ namespace CourierApp.Services
     public class OrderManager : IOrderManager
     {
         private readonly Order _order = new Order();
+        private readonly IShippingRateProvider _shippingRateProvider;
+
+        public OrderManager(IShippingRateProvider shippingRateProvider)
+        {
+            _shippingRateProvider = shippingRateProvider;
+        }
 
         public void AddItems(IList<Parcel> parcels)
         {
@@ -18,6 +25,8 @@ namespace CourierApp.Services
         public Order ProcessOrder(bool isSpeedyShipping = false)
         {
             _order.IsSpeedyShipping = isSpeedyShipping;
+
+            _order.Parcels.ToList().ForEach(p => p.LoadCosts(_shippingRateProvider.GetShippingRates()));
 
             LogOrder();
             return _order;
@@ -30,7 +39,7 @@ namespace CourierApp.Services
             
             foreach (var parcel in _order.Parcels)
             {
-                System.Diagnostics.Debug.WriteLine($"{ parcel.Type} Parcel: {parcel.DeliveryCost.ToString("C", us)}");
+                System.Diagnostics.Debug.WriteLine($"{ parcel.Type} Parcel: {parcel.TotalCost.ToString("C", us)}");
             }
 
             System.Diagnostics.Debug.WriteLine("---------------------------------------------------------------");

@@ -15,7 +15,7 @@ namespace CourierApp.Models
 
         private double GetTotalCost()
         {
-            var totalCost = Parcels.Sum(p => p.DeliveryCost);
+            var totalCost = Parcels.Sum(p => p.TotalCost);
 
             return IsSpeedyShipping ? 2 * totalCost : totalCost;
         }
