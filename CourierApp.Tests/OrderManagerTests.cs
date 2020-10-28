@@ -1,4 +1,5 @@
 using CourierApp.Enums;
+using CourierApp.Factories.Interfaces;
 using CourierApp.Models;
 using CourierApp.Services;
 using CourierApp.Services.Interfaces;
@@ -14,18 +15,16 @@ namespace CourierApp.Tests
     {
         private readonly IList<ShippingRate> _shippingRates;
         private readonly IList<Discount> _discounts;
-        private readonly Mock<IShippingRateProvider> _shippingRateProviderMock;
 
 
         private OrderManager Sut { get; }
 
         public OrderManagerTests()
         {
-            _shippingRateProviderMock = new Mock<IShippingRateProvider>(MockBehavior.Strict);
             _shippingRates = SetupShippingRates();
             _discounts = SetupDiscounts();
 
-            Sut = new OrderManager(_shippingRateProviderMock.Object);
+            Sut = new OrderManager();
         }
         
         [Fact]
@@ -34,13 +33,15 @@ namespace CourierApp.Tests
             //arrange
             var parcels = new List<Parcel>
             {
-                new Parcel(1, 1, 1)
+                new Parcel()
+                {
+                    Type = ParcelType.Small,
+                    DeliveryCost = 3     
+                }
+
             };
 
             var expectedTotalCost = 3;
-
-            _shippingRateProviderMock.Setup(m => m.GetShippingRates())
-                .Returns(_shippingRates);
 
             //act
             Sut.AddItems(parcels);
@@ -52,8 +53,6 @@ namespace CourierApp.Tests
                 Assert.NotNull(result);
                 Assert.Equal(expectedTotalCost, result.TotalCost);
             }
-
-            _shippingRateProviderMock.VerifyAll();
         }
 
         [Fact]
@@ -62,14 +61,19 @@ namespace CourierApp.Tests
             //arrange
             var parcels = new List<Parcel>
             {
-                new Parcel(10, 15, 10),
-                new Parcel(10, 15, 10)
+                new Parcel()
+                {
+                    Type = ParcelType.Medium,
+                    DeliveryCost = 8
+                },
+                new Parcel()
+                {
+                    Type = ParcelType.Medium,
+                    DeliveryCost = 8
+                }
             };
 
             var expectedTotalCost = 16;
-
-            _shippingRateProviderMock.Setup(m => m.GetShippingRates())
-                .Returns(_shippingRates);
 
             //act
             Sut.AddItems(parcels);
@@ -81,8 +85,6 @@ namespace CourierApp.Tests
                 Assert.NotNull(result);
                 Assert.Equal(expectedTotalCost, result.TotalCost);
             }
-
-            _shippingRateProviderMock.VerifyAll();
         }      
         
         [Fact]
@@ -91,14 +93,15 @@ namespace CourierApp.Tests
             //arrange
             var parcels = new List<Parcel>
             {
-                new Parcel(75, 50, 10)
+                new Parcel()
+                {
+                    Type = ParcelType.Large,
+                    DeliveryCost = 15
+                }
             };
 
             var expectedTotalCost = 30;
             var expectedSpeedyShippingCost = 15;
-
-            _shippingRateProviderMock.Setup(m => m.GetShippingRates())
-                .Returns(_shippingRates);
 
             //act
             Sut.AddItems(parcels);
@@ -111,8 +114,6 @@ namespace CourierApp.Tests
                 Assert.Equal(expectedTotalCost, result.TotalCost);
                 Assert.Equal(expectedSpeedyShippingCost, result.SpeedyShippingCost);
             }
-
-            _shippingRateProviderMock.VerifyAll();
         }
 
         [Fact]
@@ -121,14 +122,23 @@ namespace CourierApp.Tests
             //arrange
             var parcels = new List<Parcel>
             {
-                new Parcel(75, 50, 10, 55),
-                new Parcel(75, 50, 10, 73)
+                new Parcel()
+                {
+                    Type = ParcelType.Heavy,
+                    WeightKg = 55,
+                    DeliveryCost = 50,
+                    OverweightCost = 5
+                },
+                new Parcel()
+                {
+                    Type = ParcelType.Heavy,
+                    WeightKg = 73,
+                    DeliveryCost = 50,
+                    OverweightCost = 23
+                }
             };
 
             var expectedTotalCost = 128;
-
-            _shippingRateProviderMock.Setup(m => m.GetShippingRates())
-                .Returns(_shippingRates);
 
             //act
             Sut.AddItems(parcels);
@@ -140,8 +150,6 @@ namespace CourierApp.Tests
                 Assert.NotNull(result);
                 Assert.Equal(expectedTotalCost, result.TotalCost);
             }
-
-            _shippingRateProviderMock.VerifyAll();
         }
 
         [Fact]
@@ -150,17 +158,32 @@ namespace CourierApp.Tests
             //arrange
             var parcels = new List<Parcel>
             {
-                new Parcel(1, 1, 3),  //3
-                new Parcel(1, 2, 3),  //3
-                new Parcel(3, 4, 5, 2), //5
-                new Parcel(5, 6, 7)  //3
+                new Parcel()
+                {
+                    Type = ParcelType.Small,
+                    DeliveryCost = 3
+                },
+                new Parcel()
+                {
+                    Type = ParcelType.Small,
+                    DeliveryCost = 3
+                },
+                new Parcel()
+                {
+                    Type = ParcelType.Small,
+                    WeightKg = 2,
+                    DeliveryCost = 3,
+                    OverweightCost = 2
+                },
+                new Parcel()
+                {
+                    Type = ParcelType.Small,
+                    DeliveryCost = 3
+                }               
             };
 
             var expectedTotalCost = 11;
             var expectedDiscount = 3;
-
-            _shippingRateProviderMock.Setup(m => m.GetShippingRates())
-                .Returns(_shippingRates);
 
             //act
             Sut.AddItems(parcels);
@@ -173,8 +196,6 @@ namespace CourierApp.Tests
                 Assert.Equal(expectedTotalCost, result.TotalCost);
                 Assert.Equal(expectedDiscount, result.Discount);
             }
-
-            _shippingRateProviderMock.VerifyAll();
         }
 
 
@@ -184,17 +205,32 @@ namespace CourierApp.Tests
             //arrange
             var parcels = new List<Parcel>
             {
-                new Parcel(12, 1, 3), //8
-                new Parcel(13, 2, 3),  //8
-                new Parcel(33, 4, 5, 5), //12
-                new Parcel(12, 6, 7) //8
+                new Parcel()
+                {
+                    Type = ParcelType.Medium,
+                    DeliveryCost = 8
+                },
+                new Parcel()
+                {
+                    Type = ParcelType.Medium,
+                    DeliveryCost = 8
+                },
+                new Parcel()
+                {
+                    Type = ParcelType.Medium,
+                    WeightKg = 5,
+                    DeliveryCost = 8,
+                    OverweightCost = 4
+                },
+                new Parcel()
+                {
+                    Type = ParcelType.Medium,
+                    DeliveryCost = 8
+                }
             };
 
             var expectedTotalCost = 28;
             var expectedDiscount = 8;
-
-            _shippingRateProviderMock.Setup(m => m.GetShippingRates())
-                .Returns(_shippingRates);
 
             //act
             Sut.AddItems(parcels);
@@ -207,8 +243,6 @@ namespace CourierApp.Tests
                 Assert.Equal(expectedTotalCost, result.TotalCost);
                 Assert.Equal(expectedDiscount, result.Discount);
             }
-
-            _shippingRateProviderMock.VerifyAll();
         }
 
 
@@ -218,16 +252,31 @@ namespace CourierApp.Tests
             //arrange
             var parcels = new List<Parcel>
             {
-                new Parcel(12, 1, 3), //8
-                new Parcel(13, 2, 3),  //8
-                new Parcel(33, 4, 5, 5), //12
-                new Parcel(12, 6, 7) //8
+                new Parcel()
+                {
+                    Type = ParcelType.Medium,
+                    DeliveryCost = 8
+                },
+                new Parcel()
+                {
+                    Type = ParcelType.Medium,
+                    DeliveryCost = 8
+                },
+                new Parcel()
+                {
+                    Type = ParcelType.Medium,
+                    WeightKg = 5,
+                    DeliveryCost = 8,
+                    OverweightCost = 4
+                },
+                new Parcel()
+                {
+                    Type = ParcelType.Medium,
+                    DeliveryCost = 8
+                }
             };
 
             var expectedDiscount = 8;
-
-            _shippingRateProviderMock.Setup(m => m.GetShippingRates())
-                .Returns(_shippingRates);
 
             //act
             Sut.AddItems(parcels);
@@ -242,8 +291,6 @@ namespace CourierApp.Tests
                 Assert.Equal(expectedTotalCost, result.TotalCost);
                 Assert.Equal(expectedDiscount, result.Discount);
             }
-
-            _shippingRateProviderMock.VerifyAll();
         }
 
         

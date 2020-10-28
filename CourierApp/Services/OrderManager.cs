@@ -10,12 +10,6 @@ namespace CourierApp.Services
     public class OrderManager : IOrderManager
     {
         private readonly Order _order = new Order();
-        private readonly IShippingRateProvider _shippingRateProvider;
-
-        public OrderManager(IShippingRateProvider shippingRateProvider)
-        {
-            _shippingRateProvider = shippingRateProvider;
-        }
 
         public void AddItems(IList<Parcel> parcels)
         {
@@ -26,7 +20,6 @@ namespace CourierApp.Services
         {
             _order.IsSpeedyShipping = isSpeedyShipping;
 
-            _order.Parcels.ToList().ForEach(p => p.LoadCosts(_shippingRateProvider.GetShippingRates()));
             _order.Discount = discounts != null ? discounts.Sum(x => x.CalculateDiscount(_order.Parcels)) : 0;
 
             LogOrder();
